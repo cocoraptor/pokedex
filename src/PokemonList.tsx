@@ -1,29 +1,32 @@
-import { useState, useEffect, ChangeEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { NewFeatureAlert } from './NewFeatureAlert';
-import axios from 'axios';
-import { PokemonListItem, PokemonListItemFromApi } from './models';
-import './pokemon-list.css';
+import { useState, useEffect, ChangeEvent } from "react";
+import { Link } from "react-router-dom";
+import { NewFeatureAlert } from "./NewFeatureAlert";
+import axios from "axios";
+import { PokemonListItem, PokemonListItemFromApi } from "./models";
+import "./pokemon-list.css";
 
 export const getImage = (number: number): string => {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png`;
 };
 
-export const mapPokemonApiToPokemonView = (pokemon: PokemonListItemFromApi[]): PokemonListItem[] => {
+export const mapPokemonApiToPokemonView = (
+  pokemon: PokemonListItemFromApi[]
+): PokemonListItem[] => {
   return pokemon.map((pokemonItem: PokemonListItemFromApi, index: number) => {
     return {
       name: pokemonItem.name,
       imageUrl: getImage(index + 1),
       id: index + 1,
-      isFav: false
+      isFav: false,
     };
   });
 };
 
 export const PokemonList = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(50);
   const [pokemons, setPokemons] = useState<PokemonListItem[]>([]);
+  const [isOnlyFavs, setOnlyFavs] = useState(false);
   const [hasDiscoveredFav, setHasDiscoveredFav] = useState(false);
   console.log(limit);
   // Necesitamos saber si el usuario ha hecho click alguna vez en algún pokemon
@@ -44,7 +47,7 @@ export const PokemonList = () => {
   useEffect(() => {
     const fetchPokemons = async () => {
       const apiURL = `https://pokeapi.co/api/v2/pokemon?limit=${limit}`;
-      console.log('llamando a la api');
+      console.log("llamando a la api");
       const response = await axios.get(apiURL);
       setPokemons(mapPokemonApiToPokemonView(response.data.results));
     };
@@ -73,7 +76,12 @@ export const PokemonList = () => {
   };
 
   const handleClearClick = () => {
-    setSearch('');
+    setSearch("");
+  };
+
+  const handleIsOnlyFavClick = () => {
+    console.log("you clicked favs");
+    setIsOnlyFavs(!isOnlyFavs);
   };
 
   const handleLimitChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -95,6 +103,9 @@ export const PokemonList = () => {
           <option>500</option>
           <option value="5000">Todos</option>
         </select>
+        <div>
+          <button onClick={handleFavClick}>OnlyFavs</button>
+        </div>
       </div>
       <div className="pokemons">
         {!hasDiscoveredFav && <NewFeatureAlert />}
@@ -111,7 +122,10 @@ export const PokemonList = () => {
 
                   handlePokemonClick(pokemon.id);
                 }}
-                style={{ color: pokemon.isFav ? 'red' : 'black', cursor: 'pointer' }}
+                style={{
+                  color: pokemon.isFav ? "red" : "black",
+                  cursor: "pointer",
+                }}
               />
             </div>
           </Link>
